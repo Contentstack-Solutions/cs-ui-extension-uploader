@@ -1,0 +1,14 @@
+{
+  "extension": "dashboard",
+  "defaultWidth": "half",
+  "buildFolder": "/path/to/extension/build",
+  "buildLog": "/path/to/extension/build.log",
+  "name": "Custom Field Extension",
+  "type": "text",
+  "assetsFolder": "bltae347274c7efcadd",
+  "verbose": true,
+  "config": {
+    "parameterA": "Value A",
+    "parameterB": "Value B"
+  }
+}

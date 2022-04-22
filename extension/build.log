@@ -1,0 +1,32 @@
+Creating an optimized production build...
+Compiled with warnings.
+
+Failed to parse source map from '/Users/jaimesantosalcon/dev/cs/extensions/cs-ui-extension-uploader/extension/node_modules/react-is-mounted-hook/src/index.tsx' file: Error: ENOENT: no such file or directory, open '/Users/jaimesantosalcon/dev/cs/extensions/cs-ui-extension-uploader/extension/node_modules/react-is-mounted-hook/src/index.tsx'
+
+Failed to parse source map from '/Users/jaimesantosalcon/dev/cs/extensions/cs-ui-extension-uploader/extension/node_modules/react-is-mounted-hook/src/use-is-mounted.tsx' file: Error: ENOENT: no such file or directory, open '/Users/jaimesantosalcon/dev/cs/extensions/cs-ui-extension-uploader/extension/node_modules/react-is-mounted-hook/src/use-is-mounted.tsx'
+
+src/App.tsx
+  Line 21:10:  'error' is assigned a value but never used      @typescript-eslint/no-unused-vars
+  Line 22:10:  'extension' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+File sizes after gzip:
+
+  391.24 kB  build/static/js/main.79c2452b.js
+  19.58 kB   build/static/css/main.82f603fc.css
+
+The project was built assuming it is hosted at /.
+You can control this with the homepage field in your package.json.
+
+The build folder is ready to be deployed.
+You may serve it with a static server:
+
+  yarn global add serve
+  serve -s build
+
+Find out more about deployment here:
+
+  https://cra.link/deployment
+
