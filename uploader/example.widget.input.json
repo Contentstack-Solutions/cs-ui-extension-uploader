@@ -6,7 +6,8 @@
   "name": "Custom Field Extension",
   "type": "text",
   "assetsFolder": "bltae347274c7efcadd",
-  "verbose": true,
+  "verbose": false,
+  "purge": true,
   "config": {
     "parameterA": "Value A",
     "parameterB": "Value B"
