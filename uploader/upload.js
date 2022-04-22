@@ -52,8 +52,7 @@ async function run(options) {
   //4. Create the extension
 
   try {
-    const result = await createExtension(options, indexUrl);
-    const { notice } = result.data;
+    const { notice } = await createExtension(options, indexUrl);
     LOG(options, `${notice}`);
   } catch (error) {
     console.log(`${error}`);
@@ -94,7 +93,8 @@ async function purge(folderUid, options) {
         LOG(options, `Purging asset: ${assetUids[i]}...`);
         try {
           const result = await axios(`${process.env.CS_CM_API_BASE_URL}/v3/assets/${assetUids[i]}`, deleteOptions);
-          const { notice } = result.data;
+          console.log(result);
+          const { notice } = result;
           LOG(options, `${notice}`);
         } catch (error) {
           console.log(`${error}`);

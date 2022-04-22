@@ -24,7 +24,9 @@ function App() {
   React.useEffect(() => {
     // eslint-disable-next-line no-restricted-globals
     if (self === top) {
-      setError({ message: "This extension can only be used in Contentstack" });
+      const msg = "This extension can only be used in Contentstack";
+      console.log("Extension loaded outside Contentstack!", msg);
+      setError(msg);
     } else {
       ContentstackUIExtension.init().then((extension: any) => {
         console.log("Extension Loaded!", extension);
