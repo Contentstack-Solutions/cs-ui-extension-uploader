@@ -33,7 +33,11 @@ function App() {
     }
   }, []);
 
-  return <EmptyState heading={<MockHeading />} description={<MockDescription />} />;
+  return error ? (
+    <EmptyState heading={<MockHeading />} description={<div>{error}</div>} />
+  ) : (
+    <EmptyState heading={<MockHeading />} description={<MockDescription />} />
+  );
 }
 
 export default App;

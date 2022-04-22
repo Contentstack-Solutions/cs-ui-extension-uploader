@@ -6,6 +6,7 @@
   "type": "text",
   "assetsFolder": "bltae347274c7efcadd",
   "verbose": false,
+  "purge": true,
   "config": {
     "parameterA": "Value A",
     "parameterB": "Value B"

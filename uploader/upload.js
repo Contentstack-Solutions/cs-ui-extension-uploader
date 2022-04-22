@@ -35,26 +35,76 @@ async function run(options) {
   //2. Load index.html and replace the src and href with the new path
   LOG(options, `Loading index.html from ${options.indexHtmlPath}`);
   const indexHtml = fs.readFileSync(options.indexHtmlPath, { encoding: "utf8" });
-  LOG(options, `ORIGINAL INDEX.HTML ::::::::::::::::::::::::::::::::`);
-  LOG(options, `${indexHtml}`);
-  LOG(options, `END OF ORIGINAL INDEX.HTML::::::::::::::::::::::::::`);
+  // LOG(options, `ORIGINAL INDEX.HTML ::::::::::::::::::::::::::::::::`);
+  // LOG(options, `${indexHtml}`);
+  // LOG(options, `END OF ORIGINAL INDEX.HTML::::::::::::::::::::::::::`);
   const indexHtmlWithPath = indexHtml.replace(jsRegex, `src="${jsUrl}"`);
-  LOG(options, `JS REPLACED INDEX.HTML ::::::::::::::::::::::::::::::::`);
-  LOG(options, `${indexHtmlWithPath}`);
-  LOG(options, `END OF JS REPLACED INDEX.HTML::::::::::::::::::::::::::`);
+  // LOG(options, `JS REPLACED INDEX.HTML ::::::::::::::::::::::::::::::::`);
+  // LOG(options, `${indexHtmlWithPath}`);
+  // LOG(options, `END OF JS REPLACED INDEX.HTML::::::::::::::::::::::::::`);
   const indexHtmlWithPathAndCss = indexHtmlWithPath.replace(cssRegex, `href="${cssUrl}"`);
-  LOG(options, `CSS REPLACED INDEX.HTML ::::::::::::::::::::::::::::::::`);
-  LOG(options, `${indexHtmlWithPathAndCss}`);
-  LOG(options, `END OF CSS REPLACED INDEX.HTML::::::::::::::::::::::::::`);
+  // LOG(options, `CSS REPLACED INDEX.HTML ::::::::::::::::::::::::::::::::`);
+  // LOG(options, `${indexHtmlWithPathAndCss}`);
+  // LOG(options, `END OF CSS REPLACED INDEX.HTML::::::::::::::::::::::::::`);
   fs.writeFileSync(options.indexHtmlPath, indexHtmlWithPathAndCss);
   //3. Upload index.html with new paths
   const { url: indexUrl } = await uploadAsset(extensionsFolderUid, options.indexHtmlPath);
   //4. Create the extension
-  const { notice, error_code, error_message } = await createExtension(options, indexUrl);
-  if (error_code || error_message) {
-    console.log(`Error: ${error_code} ${error_message}`);
+
+  try {
+    const result = await createExtension(options, indexUrl);
+    const { notice } = result.data;
+    LOG(options, `${notice}`);
+  } catch (error) {
+    console.log(`${error}`);
+  }
+  //5. Purge old files
+  if (options.purge) {
+    await purge(extensionsFolderUid, options);
+    console.log("Purge completed!");
+  }
+}
+
+async function purge(folderUid, options) {
+  const defaultOptions = getDefaultAxiosOptions({ method: "GET" });
+  const response = await axios(
+    `${process.env.CS_CM_API_BASE_URL}/v3/assets?include_folders=true&folder=${folderUid}`,
+    defaultOptions
+  );
+
+  if (response && response.data && response.data.assets && response.data.assets.length > 0) {
+    LOG(options, `Purging extension folder...`);
+    const assetsToPurge = response.data.assets.filter(
+      (f) =>
+        f.title !== "index.html" &&
+        f.title !== extractFilename(options.mainJsPath) &&
+        f.title !== extractFilename(options.mainCssPath)
+    );
+    if (options.verbose) {
+      LOG(options, `Assets to purge: ${JSON.stringify(assetsToPurge.length)}`);
+      for (let i = 0; i < assetsToPurge.length; i++) {
+        LOG(options, `- ${assetsToPurge[i].title}, ${assetsToPurge[i].uid}`);
+      }
+    }
+
+    if (assetsToPurge && assetsToPurge.length > 0) {
+      const assetUids = assetsToPurge.map((a) => a.uid);
+      const deleteOptions = getDefaultAxiosOptions({ method: "DELETE" });
+      for (let i = 0; i < assetUids.length; i++) {
+        LOG(options, `Purging asset: ${assetUids[i]}...`);
+        try {
+          const result = await axios(`${process.env.CS_CM_API_BASE_URL}/v3/assets/${assetUids[i]}`, deleteOptions);
+          const { notice } = result.data;
+          LOG(options, `${notice}`);
+        } catch (error) {
+          console.log(`${error}`);
+        }
+      }
+    } else {
+      LOG(options, `Nothing to purge. Done!`);
+    }
   } else {
-    console.log(`${notice}`);
+    LOG(options, `Nothing to purge. Done!`);
   }
 }
 
