@@ -1,7 +1,7 @@
 {
   "extension": "field",
-  "buildFolder": "/Users/jaimesantosalcon/dev/cs/extensions/cs-ui-extension-uploader/extension/build",
-  "buildLog": "/Users/jaimesantosalcon/dev/cs/extensions/cs-ui-extension-uploader/extension/build.log",
+  "buildFolder": "/path/to/extension/build",
+  "buildLog": "/path/to/extension/build.log",
   "name": "Custom Field Example",
   "type": "text",
   "assetsFolder": "bltae347274c7efcadd",

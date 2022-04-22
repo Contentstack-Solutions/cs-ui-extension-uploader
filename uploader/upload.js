@@ -63,8 +63,8 @@ function getDefaultAxiosOptions(options) {
     ...options,
     headers: {
       ...options.headers,
-      authorization: process.env.REACT_MANAGEMENT_TOKEN,
-      api_key: process.env.REACT_API_KEY,
+      authorization: process.env.CS_MANAGEMENT_TOKEN,
+      api_key: process.env.CS_API_KEY,
     },
   };
 }
