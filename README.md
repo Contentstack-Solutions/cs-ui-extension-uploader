@@ -136,7 +136,7 @@ Additionally, when creating a **sidebar widget** extension you need to provide t
 
 ```JSON
 // "extension": "widget",
-"scope": ["$all"] // A comma-separated of content types that sill use the widget or $all for all content types
+"scope": ["$all"] // A comma-separated of content types that will use the widget or $all for all content types
 ```
 
 ### Dashboard Widget Configuration attributes
