@@ -3,7 +3,7 @@
   "scope": ["$all"],
   "buildFolder": "/path/to/extension/build",
   "buildLog": "/path/to/extension/build.log",
-  "name": "Custom Field Extension",
+  "name": "Custom Sidebar Widget Extension",
   "type": "text",
   "assetsFolder": "bltae347274c7efcadd",
   "verbose": false,
