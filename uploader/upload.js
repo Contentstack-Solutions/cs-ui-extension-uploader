@@ -60,8 +60,9 @@ async function run(options) {
   //5. Purge old files
   if (options.purge) {
     await purge(extensionsFolderUid, options);
-    console.log("Purge completed!");
+    LOG(options, `Purge completed!`);
   }
+  console.log("Script completed!");
 }
 
 async function purge(folderUid, options) {
@@ -93,7 +94,6 @@ async function purge(folderUid, options) {
         LOG(options, `Purging asset: ${assetUids[i]}...`);
         try {
           const result = await axios(`${process.env.CS_CM_API_BASE_URL}/v3/assets/${assetUids[i]}`, deleteOptions);
-          console.log(result);
           const { notice } = result;
           LOG(options, `${notice}`);
         } catch (error) {

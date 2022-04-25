@@ -1,9 +1,9 @@
 {
   "extension": "field",
+  "type": "text",
   "buildFolder": "/path/to/extension/build",
   "buildLog": "/path/to/extension/build.log",
   "name": "Custom Field Example",
-  "type": "text",
   "assetsFolder": "bltae347274c7efcadd",
   "verbose": false,
   "purge": true,
