@@ -167,6 +167,7 @@ See the useful links below to learn how to create a management token and how ext
 - [Developers Reference Docs](https://www.contentstack.com/docs/developers)
 - [Venus Component Library](https://www.contentstack.com/docs/developers/venus-component-library/)
 - [UI Extensions SDK](https://github.com/contentstack/ui-extensions-sdk)
+- [Generate A Management Token](https://www.contentstack.com/docs/developers/create-tokens/generate-a-management-token/)
 - [Exensions API](https://github.com/contentstack/ui-extensions-sdk/blob/master/docs/ui-extensions-api-reference.md#inclusion-in-your-project)
 - [Custom Fields](https://www.contentstack.com/docs/developers/create-custom-fields/)
 - [Sidebar Widgets](https://www.contentstack.com/docs/developers/create-custom-widgets/)
