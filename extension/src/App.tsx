@@ -23,16 +23,16 @@ function App() {
 
   React.useEffect(() => {
     // eslint-disable-next-line no-restricted-globals
-    if (self === top) {
-      const msg = "This extension can only be used in Contentstack";
-      console.log("Extension loaded outside Contentstack!", msg);
-      setError(msg);
-    } else {
-      ContentstackUIExtension.init().then((extension: any) => {
-        console.log("Extension Loaded!", extension);
-        setExtension(extension);
-      });
-    }
+    // if (self === top) {
+    //   const msg = "This extension can only be used in Contentstack";
+    //   console.log("Extension loaded outside Contentstack!", msg);
+    //   setError(msg);
+    // } else {
+    ContentstackUIExtension.init().then((extension: any) => {
+      console.log("Extension Loaded!", extension);
+      setExtension(extension);
+    });
+    // }
   }, []);
 
   return error ? (
