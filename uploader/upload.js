@@ -209,10 +209,8 @@ async function getExtensionFolder(options, create = true) {
         createFolderOptions
       );
       // LOG(createFolderResponse.data);
-      console.log(createFolderResponse.data);
       return createFolderResponse.data.asset.uid;
     } else {
-      console.log("Folder not found for extension: ", options.name);
       return "";
     }
   }
@@ -281,7 +279,6 @@ function inferFilesFromBuildLog(options) {
     ...options,
     references: { ...getMap(options.replacement, text) },
   };
-  console.log(`References: ${JSON.stringify(o.references)}`);
   LOG(options, `Inferred files: `);
   LOG(options, `References: ${JSON.stringify(o.references)}`);
   return o;
