@@ -20,36 +20,11 @@ function LOG(options, message) {
 }
 
 async function run(options) {
-  const jsRegex = new RegExp(`src="([^"]+${extractFilename(options.mainJsPath)})"`, "im");
-  const cssRegex = new RegExp(`href="([^"]+${extractFilename(options.mainCssPath)})"`, "im");
-  //1. Create extensions asset sub-folder, then upload css and js files to Contentstack and get their urls
-  const extensionsFolderUid = await getExtensionFolder(options);
-  LOG(options, `JS Regex: ${jsRegex}`);
-  LOG(options, `CSS Regex: ${cssRegex}`);
-
-  LOG(options, `Extensions Folder: ${extensionsFolderUid}`);
-  const { url: jsUrl } = await uploadAsset(extensionsFolderUid, options.mainJsPath);
-  LOG(options, `JS URL: ${jsUrl}`);
-  const { url: cssUrl } = await uploadAsset(extensionsFolderUid, options.mainCssPath);
-  LOG(options, `CSS URL: ${cssUrl}`);
-  //2. Load index.html and replace the src and href with the new path
-  LOG(options, `Loading index.html from ${options.indexHtmlPath}`);
-  const indexHtml = fs.readFileSync(options.indexHtmlPath, { encoding: "utf8" });
-  // LOG(options, `ORIGINAL INDEX.HTML ::::::::::::::::::::::::::::::::`);
-  // LOG(options, `${indexHtml}`);
-  // LOG(options, `END OF ORIGINAL INDEX.HTML::::::::::::::::::::::::::`);
-  const indexHtmlWithPath = indexHtml.replace(jsRegex, `src="${jsUrl}"`);
-  // LOG(options, `JS REPLACED INDEX.HTML ::::::::::::::::::::::::::::::::`);
-  // LOG(options, `${indexHtmlWithPath}`);
-  // LOG(options, `END OF JS REPLACED INDEX.HTML::::::::::::::::::::::::::`);
-  const indexHtmlWithPathAndCss = indexHtmlWithPath.replace(cssRegex, `href="${cssUrl}"`);
-  // LOG(options, `CSS REPLACED INDEX.HTML ::::::::::::::::::::::::::::::::`);
-  // LOG(options, `${indexHtmlWithPathAndCss}`);
-  // LOG(options, `END OF CSS REPLACED INDEX.HTML::::::::::::::::::::::::::`);
-  fs.writeFileSync(options.indexHtmlPath, indexHtmlWithPathAndCss);
-  //3. Upload index.html with new paths
+  //1. Update index.html with the newly generated references
+  const extensionsFolderUid = await replaceReferences(options);
+  //2. Upload index.html with new paths
   const { url: indexUrl } = await uploadAsset(extensionsFolderUid, options.indexHtmlPath);
-  //4. Create the extension
+  //3. Create the extension
 
   try {
     const { notice } = await createExtension(options, indexUrl);
@@ -57,7 +32,7 @@ async function run(options) {
   } catch (error) {
     console.log(`${error}`);
   }
-  //5. Purge old files
+  //4. Purge old files
   if (options.purge) {
     await purge(extensionsFolderUid, options);
     LOG(options, `Purge completed!`);
@@ -71,15 +46,11 @@ async function purge(folderUid, options) {
     `${process.env.CS_CM_API_BASE_URL}/v3/assets?include_folders=true&folder=${folderUid}`,
     defaultOptions
   );
+  const validFiles = Object.keys(options.references);
 
   if (response && response.data && response.data.assets && response.data.assets.length > 0) {
     LOG(options, `Purging extension folder...`);
-    const assetsToPurge = response.data.assets.filter(
-      (f) =>
-        f.title !== "index.html" &&
-        f.title !== extractFilename(options.mainJsPath) &&
-        f.title !== extractFilename(options.mainCssPath)
-    );
+    const assetsToPurge = response.data.assets.filter((f) => f.title !== "index.html" && !validFiles.includes(f.title));
     if (options.verbose) {
       LOG(options, `Assets to purge: ${JSON.stringify(assetsToPurge.length)}`);
       for (let i = 0; i < assetsToPurge.length; i++) {
@@ -220,7 +191,7 @@ async function getExtensionFolder(options, create = true) {
   }
   if (folderUid !== "") {
     // LOG(options,"Folder found for extension: ", options.name, folderUid);
-    return Promise.resolve(folderUid);
+    return folderUid;
   } else {
     // LOG(options,"Creating folder for extension: ", options.name);
     if (create) {
@@ -238,9 +209,11 @@ async function getExtensionFolder(options, create = true) {
         createFolderOptions
       );
       // LOG(createFolderResponse.data);
-      return Promise.resolve(createFolderResponse.data.asset.uid);
+      console.log(createFolderResponse.data);
+      return createFolderResponse.data.asset.uid;
     } else {
-      return Promise.resolve("");
+      console.log("Folder not found for extension: ", options.name);
+      return "";
     }
   }
 }
@@ -261,32 +234,57 @@ async function uploadAsset(folderUid, filePath) {
   data.append("asset[upload]", fs.createReadStream(filePath));
 
   const axiosOptions = getDefaultAxiosOptions({ method: method, headers: { ...data.getHeaders() }, data: data });
-  let response = await axios(url, axiosOptions);
-  return Promise.resolve(response.data.asset);
+  try {
+    let response = await axios(url, axiosOptions);
+    return response.data.asset;
+  } catch (e) {
+    console.log(e);
+    return { error_code: -1, error_message: "Something went wrong" };
+  }
+}
+
+//Assumes there's a group in position 1, that will be used as the key in the map
+function getMap(pattern, text) {
+  const regex = new RegExp(pattern, "gmi");
+  const matches = [...text.matchAll(regex)];
+  let map = {};
+  matches.map((m) => {
+    map[m[1]] = m[0];
+    return m;
+  });
+  return map;
+}
+
+async function replaceReferences(options) {
+  //1. Load index.html
+  let result = fs.readFileSync(options.indexHtmlPath, { encoding: "utf8" });
+
+  //2. Create extensions asset sub-folder, then upload css and js files to Contentstack and get their urls
+  const extensionsFolderUid = await getExtensionFolder(options);
+  LOG(options, `Extensions Folder: ${extensionsFolderUid}`);
+
+  //3. Replace references in index.html
+  for (const k in options.references) {
+    const reference = options.references[k];
+    LOG(options, `Replacing Reference: ${reference}`);
+    const { url } = await uploadAsset(extensionsFolderUid, `${options.buildFolder}${reference}`);
+    result = result.replace(reference, url);
+  }
+  fs.writeFileSync(options.indexHtmlPath, result);
+  return extensionsFolderUid;
 }
 
 function inferFilesFromBuildLog(options) {
-  const text = fs.readFileSync(options.buildLog, { encoding: "utf8" });
-  const jsRegex = /main.+.js$/im;
-  const cssRegex = /main.+.css$/im;
   LOG(options, `Inferring files from build log: ${options.buildLog}`);
-  LOG(options, `${text}`);
-  // LOG(options, "JS regex: ", jsRegex);
-  // LOG(options, "CSS regex: ", cssRegex);
-  const jsMatch = text.match(jsRegex);
-  const cssMatch = text.match(cssRegex);
-
-  if (jsMatch && jsMatch.length > 0 && cssMatch && cssMatch.length > 0) {
-    const o = {
-      ...options,
-      mainCssPath: `${options.buildFolder}/static/css/${cssMatch[0]}`,
-      mainJsPath: `${options.buildFolder}/static/js/${jsMatch[0]}`,
-    };
-    LOG(options, `Inferred files: ${o.mainCssPath} and ${o.mainJsPath}`);
-    return o;
-  }
-  LOG(options, "Could not infer files from build log");
-  return options;
+  const text = fs.readFileSync(options.buildLog, { encoding: "utf8" });
+  const o = {
+    ...options,
+    references: { ...getMap(options.replacement, text) },
+  };
+  console.log(`References: ${JSON.stringify(o.references)}`);
+  LOG(options, `Inferred files: `);
+  LOG(options, `References: ${JSON.stringify(o.references)}`);
+  return o;
 }
 
 // eslint-disable-next-line no-unused-expressions
@@ -302,7 +300,7 @@ yargs(hideBin(process.argv))
       }
       options = inferFilesFromBuildLog(options);
       options.indexHtmlPath = options.buildFolder + "/index.html";
-      LOG(options, `Running <${argv.$0}> with options: `);
+      // LOG(options, `Running <${argv.$0}> with options: `);
       LOG(options, `${JSON.stringify(options, null, 2)}`);
       run(options);
     },

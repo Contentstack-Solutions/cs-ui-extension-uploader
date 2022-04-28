@@ -3,6 +3,7 @@
   "type": "text",
   "buildFolder": "/path/to/extension/build",
   "buildLog": "/path/to/extension/build.log",
+  "replacement": "/static/.+/(.+).[css|js]$",
   "name": "Custom Field Example",
   "assetsFolder": "bltae347274c7efcadd",
   "verbose": false,
