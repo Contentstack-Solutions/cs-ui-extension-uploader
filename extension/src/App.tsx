@@ -4,7 +4,7 @@ import ContentstackUIExtension from "@contentstack/ui-extensions-sdk";
 import React from "react";
 
 const MockHeading = () => {
-  return <>This is a UI eXtension!</>;
+  return <>Hello Guys!!</>;
 };
 const MockDescription = () => {
   return (
